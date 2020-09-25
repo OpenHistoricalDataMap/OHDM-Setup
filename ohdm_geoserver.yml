@@ -1,0 +1,18 @@
+version: '3'
+
+services:    
+  mapserver:
+    image: geonode/geoserver:${GEOSERVER_IMAGE_VERSION}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+#ohne diese daten startet der server nicht. sind scheinbar config geschichten.
+      - ${GEOSERVER_VOLUME_PATH}:/geoserver_data/data
+# leider lässt sich der Tomcat nicht mit dem Geoserver "teilen". Zwei Instanzen sind vorerst nicht zu vermeiden, kann aber weiter recherchiert werden.
+#      - ${TOMCAT_VOLUME_PATH}:/usr/local/tomcat/webapps
+    restart: always
+    ports: 
+      - ${GEOSERVER_PORT}:8080
+    depends_on:
+      - postgis
+    links:
+      - postgis:postgis

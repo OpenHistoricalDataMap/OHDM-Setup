@@ -1,0 +1,41 @@
+version: '3'
+
+# wenn bspw in adminer für sql die datenbank postgresql angesprochen werden soll, MUSS der hier vergebene name (postgresql) als host angegeben werden!
+services:
+  postgis:
+#12-3.0 -> bedeutet postgres 12 mit postgis 3.0, mögliche tags bei dockerhub
+    image: postgis/postgis:${POSTGIS_IMAGE_VERSION}
+    restart: always
+    environment:
+#default super user
+      POSTGRES_USER: ${POSTGRES_USER}
+#super user pw
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ${POSTGIS_INIT_SCRIPT}:/docker-entrypoint-initdb.d/init.sql
+      - ${POSTGIS_VOLUME_PATH}:/var/lib/postgresql/data/
+    ports:
+      - ${POSTGRES_PORT}:5432
+
+#  adminer:
+#    image: adminer
+#    restart: always
+#    ports:
+#      - 8082:8080
+#    depends_on:
+#      - postgis
+    
+  mapserver:
+    restart: always
+    depends_on:
+      - postgis
+      
+  webapp:
+    image: tomcat:${TOMCAT_IMAGE_VERSION}
+    restart: always
+    volumes: 
+      - ${TOMCAT_VOLUME_PATH}:/usr/local/tomcat/webapps
+    ports:
+      - ${TOMCAT_PORT}:8080
+      
